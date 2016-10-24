@@ -54,7 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataStorage.cs" />
-    <Compile Include="EquationVariables.cs" />
+    <Compile Include="UtilityClasses\BasisStorage.cs" />
+    <Compile Include="UtilityClasses\EquationStorage.cs" />
+    <Compile Include="UtilityClasses\EquationVariables.cs" />
     <Compile Include="HeronArea.cs" />
     <Compile Include="MainMatrixWindow.cs">
       <SubType>Form</SubType>
