@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using LNU.Matrix.UtilityClasses;
 using TriangleNet.Geometry;
 
 namespace LNU.Matrix
