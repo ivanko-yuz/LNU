@@ -17,28 +17,24 @@ namespace LNU.Matrix
 
             return Math.Sqrt(p * (p - lineYZ) * (p - lineXZ) * (p - lineXY));
         }
+    }
 
+    public static class Basis { 
 
         public static BasisStorage getBase(Vertex x, Vertex y, Vertex z)
         {
-            Vertex middleCordTemp = new Vertex()
+            var middleCord = new Vertex()
             {
-                X = (x.X + y.X) / 2,
-                Y = (x.Y + y.Y) / 2
-            };
-
-            Vertex middleCord = new Vertex()
-            {
-                X = (middleCordTemp.X + z.X) / 2,
-                Y = (middleCordTemp.Y + z.Y) / 2
+                X = (((x.X + y.X) / 2) + z.X) / 2,
+                Y = (((x.Y + y.Y) / 2) + z.Y) / 2
             };
 
 
             return new BasisStorage()
             {
-                FiX = (getArea(middleCord, y, z) / getArea(x, y, z)),
-                FiY = (getArea(x, middleCord, z) / getArea(x, y, z)),
-                FiZ = (getArea(x, y, middleCord) / getArea(x, y, z)),
+                FiX = (HeronArea.getArea(middleCord, y, z) / HeronArea.getArea(x, y, z)),
+                FiY = (HeronArea.getArea(x, middleCord, z) / HeronArea.getArea(x, y, z)),
+                FiZ = (HeronArea.getArea(x, y, middleCord) / HeronArea.getArea(x, y, z)),
             };
         }
     }

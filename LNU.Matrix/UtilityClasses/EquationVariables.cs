@@ -1,4 +1,4 @@
-﻿namespace LNU.Matrix
+﻿namespace LNU.Matrix.UtilityClasses
 {
     public class EquationVariables
     {
