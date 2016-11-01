@@ -44,6 +44,7 @@
             this.tbBeta = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // button1
@@ -154,10 +155,10 @@
             this.radioButton4.AutoSize = true;
             this.radioButton4.Location = new System.Drawing.Point(62, 426);
             this.radioButton4.Name = "radioButton4";
-            this.radioButton4.Size = new System.Drawing.Size(105, 24);
+            this.radioButton4.Size = new System.Drawing.Size(101, 24);
             this.radioButton4.TabIndex = 12;
             this.radioButton4.TabStop = true;
-            this.radioButton4.Text = "Vector Ne";
+            this.radioButton4.Text = "Matrix Re";
             this.radioButton4.UseVisualStyleBackColor = true;
             // 
             // tbSigma
@@ -194,11 +195,23 @@
             this.label5.TabIndex = 16;
             this.label5.Text = "Betha";
             // 
+            // radioButton5
+            // 
+            this.radioButton5.AutoSize = true;
+            this.radioButton5.Location = new System.Drawing.Point(62, 456);
+            this.radioButton5.Name = "radioButton5";
+            this.radioButton5.Size = new System.Drawing.Size(106, 24);
+            this.radioButton5.TabIndex = 17;
+            this.radioButton5.TabStop = true;
+            this.radioButton5.Text = "Vactor Re";
+            this.radioButton5.UseVisualStyleBackColor = true;
+            // 
             // MainMatrixWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(773, 507);
+            this.Controls.Add(this.radioButton5);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.tbBeta);
@@ -240,6 +253,7 @@
         private System.Windows.Forms.TextBox tbBeta;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.RadioButton radioButton5;
     }
 }
 

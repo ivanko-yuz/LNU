@@ -10,12 +10,14 @@ namespace LNU.Matrix
         public List<Vertex> CT { get; set; }
         public List<List<Vertex>> NT { get; set; }
         public List<List<SerializableLine>> NTG { get; set; }
+        public List<int> Figure { get; set; }
 
         public DataStorage()
         {
             this.CT = new List<Vertex>();                  //точки
             this.NT = new List<List<Vertex>>();            //трикутники
             this.NTG = new List<List<SerializableLine>>(); //сегменти
+            this.Figure = new List<int>();
             ReadJson();
 
         }
@@ -25,6 +27,7 @@ namespace LNU.Matrix
              CT = JsonConvert.DeserializeObject<List<Vertex>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\CT.json"));
              NT = JsonConvert.DeserializeObject<List<List<Vertex>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NT.json"));
              NTG = JsonConvert.DeserializeObject<List<List<SerializableLine>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NTG.json"));
+             Figure = JsonConvert.DeserializeObject<List<int>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\figure.json"));
         }
     }
 }

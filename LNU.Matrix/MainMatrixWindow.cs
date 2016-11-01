@@ -1,8 +1,10 @@
 ﻿using LNU.Matrix.UtilityClasses;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using NMMP.Triangulation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using TriangleNet.Geometry;
 
@@ -13,22 +15,28 @@ namespace LNU.Matrix
         List<double[,]> Ke;
         List<double[,]> Me;
         List<BasisStorage> Ne;
-        List<DenseVector> Re;
+        List<Matrix<double>> ReMatrix;
+        List<Vector<double>> ReVector;
         List<Vector<double>> Qe;
+        DataStorage storage;
+
+        Dictionary<int, List<Constants>> conditions = new Dictionary<int, List<Constants>>();
 
         public MainMatrixWindow()
         {
             InitializeComponent();
+            storage = new DataStorage();
             Ke = new List<double[,]>();
             Me = new List<double[,]>();
             Ne = new List<BasisStorage>();
-            Re = new List<DenseVector>();
+            ReMatrix = new List<Matrix<double>>();
+            ReVector = new List<Vector<double>>();
             Qe = new List<Vector<double>>();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            DataStorage storage = new DataStorage();
+            //DataStorage storage = new DataStorage();
             List<double> squerArea = new List<double>();
             List<EquationStorage> equationStorage = new List<EquationStorage>();
 
@@ -38,7 +46,7 @@ namespace LNU.Matrix
             double sigma = double.Parse(tbSigma.Text.Replace('.', ','));
             double beta = double.Parse(tbBeta.Text.Replace('.', ','));
 
-
+            GenerateConditions(sigma, beta);
 
             double squareA11 = Math.Pow(double.Parse(tbA11.Text.Replace('.', ',')), 2);
             double squareA22 = Math.Pow(double.Parse(tbA22.Text.Replace('.', ',')), 2);
@@ -46,7 +54,7 @@ namespace LNU.Matrix
 
             foreach (var item in storage.NT)
             {
-                squerArea.Add(HeronArea.getArea(item[0], item[1], item[2]));
+                squerArea.Add(2 * HeronArea.getArea(item[0], item[1], item[2]));
                 equationStorage.Add(MatrixKeConstants.getConstants(item[0], item[1], item[2]));
                 Ne.Add(Basis.getBase(item[0], item[1], item[2]));
             }
@@ -55,7 +63,7 @@ namespace LNU.Matrix
             double constant = 0;
             for (int i = 0; i < equationStorage.Count; i++)
             {
-                constant = 1 / (2 * squerArea[i]);
+                constant = 1d / (2d * squerArea[i]);
                 Ke.Add(new double[3, 3]
                 {
                     {
@@ -94,30 +102,35 @@ namespace LNU.Matrix
                         1 * constant, 1 * constant, 2 * constant
                     }
                 });
-                PrintMatrix();
+                
             }
             #endregion
 
             #region getMatrixRe
-
+            var Uconst = 1d;
             var matrix = DenseMatrix.OfArray(new double[,] { { 1, 2 }, { 2, 1 } });
-            var leftSide = sigma / beta * matrix;
-            var rigthSide = sigma / beta * matrix;
-            foreach (var side in storage.NTG)
+            foreach (var side in GetSegments())
             {
-                foreach (var segment in side)
+                var leftSide = sigma / beta * matrix;
+                var rigthSide = sigma / beta * matrix;
+                var vector = new[] { Uconst * side.UcCof, Uconst * side.UcCof };
+                foreach (var segment in side.Segments)
                 {
-                    var vector = new[] { func(segment.Vertex1.X, segment.Vertex1.Y), func(segment.Vertex2.X, segment.Vertex2.Y) };
-                    var re = leftSide * (new DenseVector(vector)) - rigthSide * (new DenseVector(vector));
-                    Re.Add(re);
+                    var length = Math.Sqrt(Math.Pow(segment.Vertex1.X - segment.Vertex2.X, 2) +
+                                            Math.Pow(segment.Vertex1.Y - segment.Vertex2.Y, 2));
+
+                    var reLeft = (leftSide * length / 6);
+                    var reRight = (rigthSide * length / 6) * (new DenseVector(vector));
+                    ReMatrix.Add(reLeft);
+                    ReVector.Add(reRight);
                 }
             }
             #endregion
 
             #region getMatrixQe
+
             foreach (var item in storage.NT)
             {
-                var j = 0;
                 foreach (var me in Me)
                 {
                     
@@ -129,10 +142,20 @@ namespace LNU.Matrix
             }
 
             #endregion
+
+            PrintMatrix();
+            WriteMatrix();
         }
 
 
-
+        private void WriteMatrix()
+        {
+            JsonParser.Write(Me, "ME.json");
+            JsonParser.Write(Qe, "QE.json");
+            JsonParser.Write(Ke, "KE.json");
+            JsonParser.Write(ReMatrix.Select(el => el.Storage).ToList(), "ReMatrix.json");
+            JsonParser.Write(ReVector.Select(el => el.Storage).ToList(), "ReVector.json");
+        }
 
         private void PrintMatrix()
         {
@@ -140,49 +163,45 @@ namespace LNU.Matrix
 
             if (radioButton1.Checked)
             {
+                textBox1.Text = "Matrix Ke" + System.Environment.NewLine;
+                List<DenseMatrix> matrixKe = Ke.Select(item => DenseMatrix.OfArray(item)).ToList();
+
                 radioButton4.Checked = false;
                 radioButton2.Checked = false;
                 radioButton3.Checked = false;
-                foreach (var item in Ke)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            textBox1.Text += item[i, j].ToString("0.000") + " ";
-                        }
-                        textBox1.Text += System.Environment.NewLine;
-                    }
-                    textBox1.Text += System.Environment.NewLine;
+                radioButton5.Checked = false;
 
+                foreach (var item in matrixKe)
+                {
+                    textBox1.Text += item.ToString();
                 }
             }
 
             if (radioButton2.Checked)
             {
+                textBox1.Text = "Matrix Me " + System.Environment.NewLine;
+
+                List<DenseMatrix> matrixMe = Me.Select(item => DenseMatrix.OfArray(item)).ToList();
+
                 radioButton1.Checked = false;
                 radioButton4.Checked = false;
                 radioButton3.Checked = false;
-                foreach (var item in Me)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            textBox1.Text += item[i, j].ToString("0.000") + " ";
-                        }
-                        textBox1.Text += System.Environment.NewLine;
-                    }
-                    textBox1.Text += System.Environment.NewLine;
+                radioButton5.Checked = false;
 
+                foreach (var item in matrixMe)
+                {
+                    textBox1.Text += item.ToString();
                 }
             }
 
             if (radioButton3.Checked)
             {
+                textBox1.Text = "Matrix Qe " + System.Environment.NewLine;
+
                 radioButton1.Checked = false;
                 radioButton2.Checked = false;
                 radioButton4.Checked = false;
+                radioButton5.Checked = false;
 
                 foreach (var item in Qe)
                 {
@@ -192,26 +211,80 @@ namespace LNU.Matrix
 
             if (radioButton4.Checked)
             {
+                textBox1.Text = "Matrix Re " + System.Environment.NewLine;
+
                 radioButton1.Checked = false;
                 radioButton2.Checked = false;
                 radioButton3.Checked = false;
-                foreach (var item in Re)
+                radioButton5.Checked = false;
+                foreach (var item in ReMatrix)
                 {
                     textBox1.Text += item.ToString();
                 }
-
             }
+
+            if (radioButton5.Checked)
+            {
+                textBox1.Text = "Vector Re " + System.Environment.NewLine;
+
+                radioButton1.Checked = false;
+                radioButton2.Checked = false;
+                radioButton3.Checked = false;
+                radioButton4.Checked = false;
+                foreach (var item in ReVector)
+                {
+                    textBox1.Text += item.ToString();
+                }
+            }
+
+
         }
-        private double func(double x, double y) => 1d;
+        private static double Func(double x, double y) => 1d;
 
         private Vector<double> GenerateQeMatrixes(Vertex x, Vertex y, Vertex z)
         {
             var f = new double[3] {
-                    func(x.X, x.Y),
-                    func(y.X, y.Y),
-                    func(z.X, z.Y)
+                    Func(x.X, x.Y),
+                    Func(y.X, y.Y),
+                    Func(z.X, z.Y)
                 };
             return Vector.Build.DenseOfArray(f);
+        }
+
+        private IEnumerable<Constants> GetSegments()
+        {
+            List<Constants> conds;
+            if (!conditions.TryGetValue(storage.Figure[0], out conds)) return null;
+            if (conds.Count != storage.NTG.Count) return conds;
+            for (var i = 0; i < conds.Count; i++)
+            {
+                conds[i].Segments = storage.NTG[i];
+            }
+            return conds;
+        }
+
+
+        private void GenerateConditions(double sigmaValue, double bethaValue)
+        {
+            var firstCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, 1);
+            var secondCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, Math.Pow(0.1, 6));
+            var thirdCondition = new Constants(bethaValue, sigmaValue, 1);
+           
+            conditions = new Dictionary<int, List<Constants>>
+            {
+                {1, new List<Constants>()
+                    { firstCondition, firstCondition, secondCondition }},
+                {2, new List<Constants>()
+                    { secondCondition, thirdCondition, firstCondition, thirdCondition }},
+                {3, new List<Constants>()
+                    { secondCondition, firstCondition, secondCondition, thirdCondition }},
+                {4, new List<Constants>()
+                    { firstCondition, firstCondition, secondCondition }},
+                {5, new List<Constants>()
+                    { thirdCondition, firstCondition, thirdCondition, secondCondition }},
+                {6, new List<Constants>()
+                    { firstCondition, firstCondition, thirdCondition, secondCondition, thirdCondition }}
+            };
         }
 
     }
