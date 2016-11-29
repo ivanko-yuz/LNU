@@ -20,6 +20,7 @@ namespace LNU.Matrix
         List<Vector<double>> ReVector;
         List<Vector<double>> Qe;
         DataStorage storage;
+        double value = 1;
 
         public DenseMatrix A { get; set; }
         public DenseVector B { get; set; }
@@ -47,10 +48,15 @@ namespace LNU.Matrix
             double a11 = double.Parse(tbA11.Text.Replace('.', ','));
             double a22 = double.Parse(tbA22.Text.Replace('.', ','));
             double a12 = double.Parse(tbA12.Text.Replace('.', ','));
-            double sigma = double.Parse(tbSigma.Text.Replace('.', ','));
-            double beta = double.Parse(tbBeta.Text.Replace('.', ','));
+            var sigmas = tbSigma.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => Convert.ToDouble(s.Replace(',', '.')));
+            var betas = tbBeta.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(b => Convert.ToDouble(b.Replace(',', '.')));
+            var d = tbD.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(b => Convert.ToDouble(b.Replace(',', '.')));
+            value = double.Parse(tbValue.Text.Replace('.', ','));
 
-            GenerateConditions(sigma, beta);
+            GenerateConditions(sigmas.ToArray(), betas.ToArray(), d.ToArray());
 
             double squareA11 = Math.Pow(double.Parse(tbA11.Text.Replace('.', ',')), 2);
             double squareA22 = Math.Pow(double.Parse(tbA22.Text.Replace('.', ',')), 2);
@@ -112,12 +118,14 @@ namespace LNU.Matrix
 
             #region getMatrixRe
             var Uconst = 1d;
+            var index = 0;
             var matrix = DenseMatrix.OfArray(new double[,] { { 1, 2 }, { 2, 1 } });
             foreach (var side in GetSegments())
             {
-                var leftSide = sigma / beta * matrix;
-                var rigthSide = sigma / beta * matrix;
+                var leftSide = sigmas.ToArray()[index] / betas.ToArray()[index] * matrix;
+                var rigthSide = sigmas.ToArray()[index] / betas.ToArray()[index] * matrix;
                 var vector = new[] { Uconst * side.UcCof, Uconst * side.UcCof };
+                index++;
                 foreach (var segment in side.Segments)
                 {
                     var length = Math.Sqrt(Math.Pow(segment.Vertex1.X - segment.Vertex2.X, 2) +
@@ -153,7 +161,7 @@ namespace LNU.Matrix
             JoinAllMatrixes();
 
             var res = A.Solve(B);
-            PrintResult();
+            //PrintResult();
 
             JsonParser.Write(res, "Result.json");
             JsonParser.Write(A.ToArray(), "A.json");
@@ -325,7 +333,7 @@ namespace LNU.Matrix
 
 
         }
-        private static double Func(double x, double y) => 1d;
+        private double Func(double x, double y) => value;
 
         private Vector<double> GenerateQeMatrixes(Vertex x, Vertex y, Vertex z)
         {
@@ -349,30 +357,70 @@ namespace LNU.Matrix
             return conds;
         }
 
-
-        private void GenerateConditions(double sigmaValue, double bethaValue)
+        private void GenerateConditions(double[] sigmaValue, double[] bethaValue, double[] dValues)
         {
-            var firstCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, 1);
-            var secondCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, Math.Pow(0.1, 6));
-            var thirdCondition = new Constants(bethaValue, sigmaValue, 1);
+            var cond1 = new List<Constants>()
+            {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
+            };
+            //2                                                                                    
+            var cond2 = new List<Constants>() {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+            };
+            //3                                                                                     
+            var cond3 = new List<Constants>()
+            {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+            };
+            //4                                                                                     
+            var cond4 = new List<Constants>()
+            {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
+            };
+            //5
+            var cond5 = new List<Constants>()
+            {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+            };
+            //6
+            var cond6 = new List<Constants>()
+            {
+                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], 1),
+                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], 1),
+                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], 1),
+                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], 1),
+                new Constants(bethaValue[4] == 0 ? Math.Pow(0.1, 6) : bethaValue[4], sigmaValue[4], 1),
+                new Constants(bethaValue[5] == 0 ? Math.Pow(0.1, 6) : bethaValue[5], sigmaValue[5], 1)
+            };
 
             conditions = new Dictionary<int, List<Constants>>
             {
-                {1, new List<Constants>()
-                    { firstCondition, firstCondition, secondCondition }},
-                {2, new List<Constants>()
-                    { secondCondition, thirdCondition, firstCondition, thirdCondition }},
-                {3, new List<Constants>()
-                    { secondCondition, firstCondition, secondCondition, thirdCondition }},
-                {4, new List<Constants>()
-                    { firstCondition, firstCondition, secondCondition }},
-                {5, new List<Constants>()
-                    { thirdCondition, firstCondition, thirdCondition, secondCondition }},
-                {6, new List<Constants>()
-                    { firstCondition, firstCondition, thirdCondition, secondCondition, thirdCondition }}
+                {1, cond1},
+                {2, cond2},
+                {3, cond3},
+                {4, cond4},
+                {5, cond5},
+                {6, cond6}
             };
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            PrintResult();
+        }
     }
 
 }
