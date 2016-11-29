@@ -4,6 +4,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using NMMP.Triangulation;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using TriangleNet.Geometry;
@@ -19,6 +20,9 @@ namespace LNU.Matrix
         List<Vector<double>> ReVector;
         List<Vector<double>> Qe;
         DataStorage storage;
+
+        public DenseMatrix A { get; set; }
+        public DenseVector B { get; set; }
 
         Dictionary<int, List<Constants>> conditions = new Dictionary<int, List<Constants>>();
 
@@ -145,8 +149,32 @@ namespace LNU.Matrix
 
             PrintMatrix();
             WriteMatrix();
+
+            SummMatrixes();
+
+            var res = A.Solve(B);
+
+            JsonParser.Write(res, "Result.json");
+            JsonParser.Write(A.ToArray(), "A.json");
+            JsonParser.Write(B.ToArray(), "B.json");
+
+            WriteResultsToFile(res.ToList(), "Results.txt");
         }
 
+
+        private void WriteResultsToFile(List<double> z, string path)
+        {
+            var i = 0;
+            using (var sr = new StreamWriter(path))
+            {
+                foreach (var vert in storage.CT)
+                {
+                    string toWrite = $"{vert.Y.ToString("0.000").Replace(',', '.')} {vert.X.ToString("0.000").Replace(',', '.')} {z[i++].ToString("0.000").Replace(',', '.')}";
+                    sr.WriteLine(toWrite);
+                }
+            }
+
+        }
 
         private void WriteMatrix()
         {
@@ -155,6 +183,50 @@ namespace LNU.Matrix
             JsonParser.Write(Ke, "KE.json");
             JsonParser.Write(ReMatrix.Select(el => el.Storage).ToList(), "ReMatrix.json");
             JsonParser.Write(ReVector.Select(el => el.Storage).ToList(), "ReVector.json");
+        }
+
+        private void SummMatrixes()
+        {
+            int vertexesCount = storage.CT.Count;
+            var a = new double[vertexesCount, vertexesCount];
+            var b = new double[vertexesCount];
+            var triangleIndex = 0;
+
+            foreach (var triangle in storage.NT)
+            {
+                for (var i = 0; i < 3; i++)
+                {
+                    var ai = triangle[i].ID;
+                    for (var j = 0; j < 3; j++)
+                    {
+                        var aj = triangle[j].ID;
+                        a[ai, aj] += Ke[triangleIndex][i, j] + Me[triangleIndex][i, j];
+                    }
+                    b[ai] += Qe[triangleIndex][i];
+
+                }
+                triangleIndex++;
+            }
+
+            var ntg = storage.NTG.ToList();
+            for (int k = 0; k < storage.NTG.Count; k++)
+            {
+                for (int i = 0; i < ntg[k].Count; i++)
+                {
+                    //var ai = ntg[k].Segments[i].Vertex1.ID;
+                    //var aj = ntg[k].Segments[i].Vertex2.ID;
+                    var ai = ntg[k][i].Vertex1.ID;
+                    var aj = ntg[k][i].Vertex2.ID;
+                    a[ai, ai] += ReMatrix[k][0, 0];
+                    a[ai, aj] += ReMatrix[k][0, 1];
+                    a[aj, ai] += ReMatrix[k][1, 0];
+                    a[aj, aj] += ReMatrix[k][1, 1];
+                    b[ai] += ReVector[k][0];
+                    b[aj] += ReVector[k][1];
+                }
+            }
+            A = DenseMatrix.OfArray(a);
+            B = DenseVector.OfArray(b);
         }
 
         private void PrintMatrix()

@@ -3,6 +3,7 @@ using NMMP.Triangulation;
 using System.Collections.Generic;
 using TriangleNet.Geometry;
 
+
 namespace LNU.Matrix
 {
     public class DataStorage
@@ -24,10 +25,10 @@ namespace LNU.Matrix
 
         private void ReadJson()
         {
-             CT = JsonConvert.DeserializeObject<List<Vertex>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\CT.json"));
-             NT = JsonConvert.DeserializeObject<List<List<Vertex>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NT.json"));
-             NTG = JsonConvert.DeserializeObject<List<List<SerializableLine>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NTG.json"));
-             Figure = JsonConvert.DeserializeObject<List<int>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\figure.json"));
+            CT = JsonConvert.DeserializeObject<List<Vertex>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\CT.json"));
+            NT = JsonConvert.DeserializeObject<List<List<Vertex>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NT.json"));
+            NTG = JsonConvert.DeserializeObject<List<List<SerializableLine>>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\NTG.json"));
+            Figure = JsonConvert.DeserializeObject<List<int>>(System.IO.File.ReadAllText(@"C:\Users\vanuy\Desktop\Lnu.Triangulation\NMMP.Triangulation\bin\Debug\figure.json"));
         }
     }
 }

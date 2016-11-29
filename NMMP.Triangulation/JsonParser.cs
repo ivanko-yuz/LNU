@@ -9,5 +9,10 @@ namespace NMMP.Triangulation
         {
             System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(data));
         }
+
+        public static void Write<T>(T data, string path)
+        {
+            System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(data));
+        }
     }
 }
