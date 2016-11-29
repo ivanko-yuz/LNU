@@ -172,7 +172,7 @@
             this.tbSigma.Name = "tbSigma";
             this.tbSigma.Size = new System.Drawing.Size(100, 26);
             this.tbSigma.TabIndex = 13;
-            this.tbSigma.Text = "1 1 1 1 1 1";
+            this.tbSigma.Text = "1 1 1 1";
             // 
             // tbBeta
             // 
@@ -180,7 +180,7 @@
             this.tbBeta.Name = "tbBeta";
             this.tbBeta.Size = new System.Drawing.Size(100, 26);
             this.tbBeta.TabIndex = 14;
-            this.tbBeta.Text = "1 1 1 1 1 1";
+            this.tbBeta.Text = "1 1 1 1";
             // 
             // label4
             // 
@@ -217,7 +217,7 @@
             this.tbD.Name = "tbD";
             this.tbD.Size = new System.Drawing.Size(100, 26);
             this.tbD.TabIndex = 18;
-            this.tbD.Text = "1 1 1 1 1 1";
+            this.tbD.Text = "1 1 1 1";
             // 
             // label6
             // 

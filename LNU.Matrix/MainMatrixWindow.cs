@@ -48,15 +48,40 @@ namespace LNU.Matrix
             double a11 = double.Parse(tbA11.Text.Replace('.', ','));
             double a22 = double.Parse(tbA22.Text.Replace('.', ','));
             double a12 = double.Parse(tbA12.Text.Replace('.', ','));
-            var sigmas = tbSigma.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+
+            var sigma = tbSigma.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => Convert.ToDouble(s.Replace(',', '.')));
-            var betas = tbBeta.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+            var sigmas = new double[6] {
+                sigma.ToArray().Length >= 1 ? sigma.ToArray()[0] : 0,
+                sigma.ToArray().Length >= 2 ? sigma.ToArray()[1] : 0,
+                sigma.ToArray().Length >= 3 ? sigma.ToArray()[2] : 0,
+                sigma.ToArray().Length >= 4 ? sigma.ToArray()[3] : 0,
+                sigma.ToArray().Length >= 5 ? sigma.ToArray()[4] : 0,
+                sigma.ToArray().Length >= 6 ? sigma.ToArray()[5] : 0,
+            };
+            var beta = tbBeta.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(b => Convert.ToDouble(b.Replace(',', '.')));
-            var d = tbD.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+            var betas = new double[6] {
+                beta.ToArray().Length >= 1 ? beta.ToArray()[0] : 0,
+                beta.ToArray().Length >= 2 ? beta.ToArray()[1] : 0,
+                beta.ToArray().Length >= 3 ? beta.ToArray()[2] : 0,
+                beta.ToArray().Length >= 4 ? beta.ToArray()[3] : 0,
+                beta.ToArray().Length >= 5 ? beta.ToArray()[4] : 0,
+                beta.ToArray().Length >= 6 ? beta.ToArray()[5] : 0,
+            };
+            var ds = tbD.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(b => Convert.ToDouble(b.Replace(',', '.')));
+            var d = new double[6] {
+                ds.ToArray().Length >= 1 ? ds.ToArray()[0] : 0,
+                ds.ToArray().Length >= 2 ? ds.ToArray()[1] : 0,
+                ds.ToArray().Length >= 3 ? ds.ToArray()[2] : 0,
+                ds.ToArray().Length >= 4 ? ds.ToArray()[3] : 0,
+                ds.ToArray().Length >= 5 ? ds.ToArray()[4] : 0,
+                ds.ToArray().Length >= 6 ? ds.ToArray()[5] : 0,
+            };
             value = double.Parse(tbValue.Text.Replace('.', ','));
 
-            GenerateConditions(sigmas.ToArray(), betas.ToArray(), d.ToArray());
+            GenerateConditions(sigmas, betas, d);
 
             double squareA11 = Math.Pow(double.Parse(tbA11.Text.Replace('.', ',')), 2);
             double squareA22 = Math.Pow(double.Parse(tbA22.Text.Replace('.', ',')), 2);
@@ -222,8 +247,6 @@ namespace LNU.Matrix
             {
                 for (int i = 0; i < ntg[k].Count; i++)
                 {
-                    //var ai = ntg[k].Segments[i].Vertex1.ID;
-                    //var aj = ntg[k].Segments[i].Vertex2.ID;
                     var ai = ntg[k][i].Vertex1.ID;
                     var aj = ntg[k][i].Vertex2.ID;
                     a[ai, ai] += ReMatrix[k][0, 0];
@@ -243,11 +266,11 @@ namespace LNU.Matrix
         {
             textBox1.Text = "Matrix A " + System.Environment.NewLine;
 
-            textBox1.Text += A.ToString("0.000");
+            textBox1.Text += A.ToString("0.0000");
 
             textBox1.Text += "Vector B " + System.Environment.NewLine;
 
-            textBox1.Text += B.ToString("0.000");
+            textBox1.Text += B.ToString("0.0000");
 
         }
         private void PrintMatrix()
@@ -359,61 +382,56 @@ namespace LNU.Matrix
 
         private void GenerateConditions(double[] sigmaValue, double[] bethaValue, double[] dValues)
         {
-            var cond1 = new List<Constants>()
-            {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
-            };
-            //2                                                                                    
-            var cond2 = new List<Constants>() {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
-                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
-            };
-            //3                                                                                     
-            var cond3 = new List<Constants>()
-            {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
-                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
-            };
-            //4                                                                                     
-            var cond4 = new List<Constants>()
-            {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
-            };
-            //5
-            var cond5 = new List<Constants>()
-            {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
-                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
-            };
-            //6
-            var cond6 = new List<Constants>()
-            {
-                new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], 1),
-                new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], 1),
-                new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], 1),
-                new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], 1),
-                new Constants(bethaValue[4] == 0 ? Math.Pow(0.1, 6) : bethaValue[4], sigmaValue[4], 1),
-                new Constants(bethaValue[5] == 0 ? Math.Pow(0.1, 6) : bethaValue[5], sigmaValue[5], 1)
-            };
-
             conditions = new Dictionary<int, List<Constants>>
             {
-                {1, cond1},
-                {2, cond2},
-                {3, cond3},
-                {4, cond4},
-                {5, cond5},
-                {6, cond6}
+                {1, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
+                    }
+                },
+                {2, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                        new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+                    }
+                },
+                {3, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                        new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+                    }
+                },
+                {4, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2])
+                    }
+                },
+                {5, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], dValues[0] == 0 ? Math.Pow(0.1, 6) : dValues[0]),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], dValues[1] == 0 ? Math.Pow(0.1, 6) : dValues[1]),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], dValues[2] == 0 ? Math.Pow(0.1, 6) : dValues[2]),
+                        new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], dValues[3] == 0 ? Math.Pow(0.1, 6) : dValues[3])
+                    }
+                },
+                {6, new List<Constants>()
+                    {
+                        new Constants(bethaValue[0] == 0 ? Math.Pow(0.1, 6) : bethaValue[0], sigmaValue[0], 1),
+                        new Constants(bethaValue[1] == 0 ? Math.Pow(0.1, 6) : bethaValue[1], sigmaValue[1], 1),
+                        new Constants(bethaValue[2] == 0 ? Math.Pow(0.1, 6) : bethaValue[2], sigmaValue[2], 1),
+                        new Constants(bethaValue[3] == 0 ? Math.Pow(0.1, 6) : bethaValue[3], sigmaValue[3], 1),
+                        new Constants(bethaValue[4] == 0 ? Math.Pow(0.1, 6) : bethaValue[4], sigmaValue[4], 1),
+                        new Constants(bethaValue[5] == 0 ? Math.Pow(0.1, 6) : bethaValue[5], sigmaValue[5], 1)
+                    }
+                },
             };
         }
 
