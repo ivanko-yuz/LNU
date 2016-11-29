@@ -106,7 +106,7 @@ namespace LNU.Matrix
                         1 * constant, 1 * constant, 2 * constant
                     }
                 });
-                
+
             }
             #endregion
 
@@ -137,7 +137,7 @@ namespace LNU.Matrix
             {
                 foreach (var me in Me)
                 {
-                    
+
                     var vector = GenerateQeMatrixes(item[0], item[1], item[2]);
                     var result = DenseMatrix.OfArray(me).Multiply(vector);
                     Qe.Add(result);
@@ -150,9 +150,10 @@ namespace LNU.Matrix
             PrintMatrix();
             WriteMatrix();
 
-            SummMatrixes();
+            JoinAllMatrixes();
 
             var res = A.Solve(B);
+            PrintResult();
 
             JsonParser.Write(res, "Result.json");
             JsonParser.Write(A.ToArray(), "A.json");
@@ -169,7 +170,7 @@ namespace LNU.Matrix
             {
                 foreach (var vert in storage.CT)
                 {
-                    string toWrite = $"{vert.Y.ToString("0.000").Replace(',', '.')} {vert.X.ToString("0.000").Replace(',', '.')} {z[i++].ToString("0.000").Replace(',', '.')}";
+                    string toWrite = $"{vert.X.ToString("0.000").Replace(',', '.')} {vert.Y.ToString("0.000").Replace(',', '.')} {z[i++].ToString("0.000").Replace(',', '.')}";
                     sr.WriteLine(toWrite);
                 }
             }
@@ -185,7 +186,7 @@ namespace LNU.Matrix
             JsonParser.Write(ReVector.Select(el => el.Storage).ToList(), "ReVector.json");
         }
 
-        private void SummMatrixes()
+        private void JoinAllMatrixes()
         {
             int vertexesCount = storage.CT.Count;
             var a = new double[vertexesCount, vertexesCount];
@@ -229,9 +230,22 @@ namespace LNU.Matrix
             B = DenseVector.OfArray(b);
         }
 
+
+        private void PrintResult()
+        {
+            textBox1.Text = "Matrix A " + System.Environment.NewLine;
+
+            textBox1.Text += A.ToString("0.000");
+
+            textBox1.Text += "Vector B " + System.Environment.NewLine;
+
+            textBox1.Text += B.ToString("0.000");
+
+        }
         private void PrintMatrix()
         {
             textBox1.Text = String.Empty;
+
 
             if (radioButton1.Checked)
             {
@@ -341,7 +355,7 @@ namespace LNU.Matrix
             var firstCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, 1);
             var secondCondition = new Constants(Math.Pow(0.1, 6), sigmaValue, Math.Pow(0.1, 6));
             var thirdCondition = new Constants(bethaValue, sigmaValue, 1);
-           
+
             conditions = new Dictionary<int, List<Constants>>
             {
                 {1, new List<Constants>()

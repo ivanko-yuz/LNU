@@ -114,7 +114,7 @@
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(446, 473);
+            this.textBox1.Size = new System.Drawing.Size(575, 473);
             this.textBox1.TabIndex = 8;
             // 
             // radioButton1
@@ -210,7 +210,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(773, 507);
+            this.ClientSize = new System.Drawing.Size(888, 507);
             this.Controls.Add(this.radioButton5);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
